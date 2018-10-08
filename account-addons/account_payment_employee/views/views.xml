@@ -1,60 +1,65 @@
 <odoo>
   <data>
-    <!-- explicit list view definition -->
-    <!--
-    <record model="ir.ui.view" id="account_payment_employee.list">
-      <field name="name">account_payment_employee list</field>
-      <field name="model">account_payment_employee.account_payment_employee</field>
+   
+    <record id="view_account_payment_form_jtm" model="ir.ui.view">
+      <field name="name">view.account.payment.form.jtm</field>
+      <field name="model">account.payment</field>
+      <field name="inherit_id" ref="account.view_account_payment_invoice_form"/>
       <field name="arch" type="xml">
-        <tree>
-          <field name="name"/>
-          <field name="value"/>
-          <field name="value2"/>
-        </tree>
+        <xpath expr="//field[@name='journal_id']" position="after">
+          <field name="paid_by_employee"/>
+          <field name="paid_by_employee_id" attrs="{'invisible': [('paid_by_employee','=',False)]}"/>
+        </xpath>
       </field>
     </record>
-    -->
 
-    <!-- actions opening views on models -->
-    <!--
-    <record model="ir.actions.act_window" id="account_payment_employee.action_window">
-      <field name="name">account_payment_employee window</field>
-      <field name="res_model">account_payment_employee.account_payment_employee</field>
-      <field name="view_mode">tree,form</field>
-    </record>
-    -->
-
-    <!-- server action to the one above -->
-    <!--
-    <record model="ir.actions.server" id="account_payment_employee.action_server">
-      <field name="name">account_payment_employee server</field>
-      <field name="model_id" ref="model_account_payment_employee_account_payment_employee"/>
-      <field name="state">code</field>
-      <field name="code">
-        action = {
-          "type": "ir.actions.act_window",
-          "view_mode": "tree,form",
-          "res_model": self._name,
-        }
+    <record id="view_account_payment_invoice_form_jtm" model="ir.ui.view">
+      <field name="name">account.payment.invoice.form.jtm</field>
+      <field name="model">account.payment</field>
+      <field name="inherit_id" ref="payment.view_account_payment_form_inherit_payment"/>
+      <field name="arch" type="xml">
+        <xpath expr="//header" position="inside">
+          <button type="object" name="reimburse_employee" class="oe_highlight" string="Reimburse Employee" attrs="{'invisible': ['|',('paid_by_employee','=',False),('employee_reimbursed','=',True)]}"/>
+        </xpath>
+        <xpath expr="//field[@name='payment_transaction_id']" position="after">
+          <field name="paid_by_employee"/>
+          <field name="paid_by_employee_id" attrs="{'invisible': [('paid_by_employee','=',False)]}"/>
+          <field name="employee_reimbursed" attrs="{'invisible': [('paid_by_employee','=',False)]}"/>
+        </xpath>
       </field>
     </record>
-    -->
 
-    <!-- Top menu item -->
-    <!--
-    <menuitem name="account_payment_employee" id="account_payment_employee.menu_root"/>
-    -->
-    <!-- menu categories -->
-    <!--
-    <menuitem name="Menu 1" id="account_payment_employee.menu_1" parent="account_payment_employee.menu_root"/>
-    <menuitem name="Menu 2" id="account_payment_employee.menu_2" parent="account_payment_employee.menu_root"/>
-    -->
-    <!-- actions -->
-    <!--
-    <menuitem name="List" id="account_payment_employee.menu_1_list" parent="account_payment_employee.menu_1"
-              action="account_payment_employee.action_window"/>
-    <menuitem name="Server to list" id="account_payment_employee" parent="account_payment_employee.menu_2"
-              action="account_payment_employee.action_server"/>
-    -->
+    <record id="payment_select_employee" model="ir.ui.view">
+      <field name="name">Employee Selector</field>
+      <field name="model">account.payment.employee</field>
+      <field name="arch" type="xml">
+        <form>
+          <sheet>
+            <group>
+              <field name="employee_id"/>
+            </group>
+          </sheet>
+          <footer>
+            <button type="object" name="load_employee_payments" string="Load Payments" class="oe_highlight"/>
+            <button special="cancel" string="Cancel"/>
+          </footer>
+        </form>
+      </field>
+    </record>
+
+    <record id="action_invoice_employee_payments" model="ir.actions.act_window">
+        <field name="name">Employee Payments</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">account.payment.employee</field>
+        <field name="view_type">form</field>
+        <field name="view_id" ref="account_payment_employee.payment_select_employee"/>
+        <field name="target">new</field>
+    </record>
+
+    <menuitem action="action_invoice_employee_payments"
+      id="menu_action_invoice_employee_payments"
+      parent="account.menu_finance_payables_documents"
+      sequence="21"/>
+
   </data>
 </odoo>
